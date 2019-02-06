@@ -113,6 +113,52 @@ bool ofxMyUtil::File::saveRandomText(const string &path, const unsigned int &len
 
 }
 
+
+
+//--------------------------------------------------------------
+// ThreadSaveImageQueue
+//--------------------------------------------------------------
+ofxMyUtil::File::ThreadSaveImageQueue::ThreadSaveImageQueue() {}
+
+//--------------------------------------------------------------
+ofxMyUtil::File::ThreadSaveImageQueue::~ThreadSaveImageQueue() {
+	stop();
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::File::ThreadSaveImageQueue::run() {
+	startThread();
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::File::ThreadSaveImageQueue::stop() {
+	while (isThreadRunning()) {
+		stopThread();
+	}
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::File::ThreadSaveImageQueue::threadedFunction() {
+	while (isThreadRunning()) {
+		if (!q.empty()) {
+			QueuePix i = q.front();
+			ofSaveImage(i.pix, i.savePath);
+			q.pop();
+		}
+	}
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::File::ThreadSaveImageQueue::addQueue(const ofPixels &pix, const string &savePath) {
+
+	QueuePix qPix;
+	qPix.pix = pix;
+	qPix.savePath = savePath;
+	q.push(qPix);
+
+}
+
+
 //--------------------------------------------------------------
 // String
 //--------------------------------------------------------------
@@ -276,7 +322,7 @@ int ofxMyUtil::IO::getIpHost() {
 //--------------------------------------------------------------
 
 //--------------------------------------------------------------
-void ofxMyUtil::_ImGui::BasicInfos(const std::string &name, const ImGuiWindowFlags &flags) {
+void ofxMyUtil::_ImGui::BasicInfos(const std::string &name, ImGuiWindowFlags flags) {
 
 	ImGui::Begin(name.c_str(), 0, flags);
 	if (ImGui::CollapsingHeader("_ImGui Basic Infos", 0)) {
@@ -284,14 +330,19 @@ void ofxMyUtil::_ImGui::BasicInfos(const std::string &name, const ImGuiWindowFla
 		ImGui::Text("ip address : %s", ofxMyUtil::IO::getIpAddress().c_str());
 		ImGui::Text("framerate :  %s", ofToString(ofGetFrameRate(), 4).c_str());
 		
+		ImGui::Text("position : x %.2f, y %.2f", ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
+		ImGui::Text("size : x %.2f, y %.2f", ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
+
 	}
 	ImGui::End();
 
 }
 
 //--------------------------------------------------------------
+// ImGui Window Falgs Settings
+//--------------------------------------------------------------
 ImGuiWindowFlags ofxMyUtil::_ImGui::ImGuiWindowFlagsSettings::getImGuiWindowFlags() {
-	
+
 	return flags;
 
 }
@@ -310,6 +361,7 @@ void ofxMyUtil::_ImGui::ImGuiWindowFlagsSettings::ImGui(const string &name) {
 	flags = window_flags;
 
 	ImGui::Begin(name.c_str(), 0, window_flags);
+	ImGui::PushID(name.c_str());
 	if (ImGui::CollapsingHeader("_ImGui window style settings", 0)) {
 		ImGui::Checkbox("No titlebar", &no_titlebar);;
 		ImGui::Checkbox("No border", &no_border);;
@@ -319,7 +371,194 @@ void ofxMyUtil::_ImGui::ImGuiWindowFlagsSettings::ImGui(const string &name) {
 		ImGui::Checkbox("No collapse", &no_collapse);
 		ImGui::Checkbox("No menu", &no_menu);
 	}
-	
+	ImGui::PopID();
 	ImGui::End();
 
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::_ImGui::ImGuiWindowFlagsSettings::loadSettings(const string &path) {
+
+	ofFile file(path);
+	if (!file.exists()) return;
+	ofBuffer buf(file);
+
+	for (ofBuffer::Line it = buf.getLines().begin(), end = buf.getLines().end(); it != end; it++) {
+	
+		string line = *it;
+		if (line == "") continue;
+		vector<string> temp = ofSplitString(line, ":");
+		
+		if (2 == temp.size()) {
+			if ("no_titlebar" == temp[0]) no_titlebar = ofToBool(temp[1]);
+			if ("no_border" == temp[0]) no_border = ofToBool(temp[1]);
+			if ("no_resize" == temp[0]) no_resize = ofToBool(temp[1]);
+			if ("no_move" == temp[0]) no_move = ofToBool(temp[1]);
+			if ("no_scrollbar" == temp[0]) no_scrollbar = ofToBool(temp[1]);
+			if ("no_collapse" == temp[0]) no_collapse = ofToBool(temp[1]);
+			if ("no_menu" == temp[0]) no_menu = ofToBool(temp[1]);
+		}
+	}
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::_ImGui::ImGuiWindowFlagsSettings::saveSettings(const string &path) {
+
+	stringstream ss;
+	ss << "no_titlebar:" << no_titlebar << "\n";
+	ss << "no_border:" << no_border << "\n";
+	ss << "no_resize:" << no_resize << "\n";
+	ss << "no_move:" << no_move << "\n";
+	ss << "no_scrollbar:" << no_scrollbar << "\n";
+	ss << "no_collapse:" << no_collapse << "\n";
+	ss << "no_menu:" << no_menu << "\n";
+
+	ofxMyUtil::File::createFile(path, ss);
+
+}
+
+//--------------------------------------------------------------
+// ImGuiWindowSetCondSettings
+//--------------------------------------------------------------
+void ofxMyUtil::_ImGui::ImGuiWindowSetCondSettings::changeState(const ImGuiSetCond_ &state) {
+	value = state;
+}
+
+//--------------------------------------------------------------
+ImGuiSetCond_ ofxMyUtil::_ImGui::ImGuiWindowSetCondSettings::getSetCondState() {
+	return (ImGuiSetCond_)value;
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::_ImGui::ImGuiWindowSetCondSettings::ImGui(const string &name) {
+
+	ImGui::Begin(name.c_str());
+	{
+		if (ImGui::CollapsingHeader("_ImGui window setCond settings")) {
+
+			ImGui::RadioButton("Always", &value, (int)ImGuiSetCond_::ImGuiSetCond_Always);
+			ImGui::RadioButton("Appearing", &value, (int)ImGuiSetCond_::ImGuiSetCond_Appearing);
+			ImGui::RadioButton("FirstUseEver", &value, (int)ImGuiSetCond_::ImGuiSetCond_FirstUseEver);
+			ImGui::RadioButton("Once", &value, (int)ImGuiSetCond_::ImGuiSetCond_Once);
+
+		}
+	}
+	ImGui::End();
+
+}
+
+//スケールを縮尺する場合、なぜか0.2とか0.3とかの少数第一位までしか指定できない
+//--------------------------------------------------------------
+void ofxMyUtil::_ImGui::drawFbo(const ofFbo &fbo, GLuint &sourceID, string name, ImGuiWindowFlags flag) {
+
+	if (!fbo.isAllocated()) return;
+	
+	ofPixels pix;
+	pix.clear();
+
+	fbo.readToPixels(pix);
+	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
+	glDeleteTextures(1, &sourceID);
+	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), fbo.getWidth(), fbo.getHeight());
+	
+	ImGui::Begin(name.c_str(), 0, ImVec2(fbo.getWidth() * 1.1, fbo.getHeight()* 1.1f), .5f, flag);
+	{
+		ImGui::Image((ImTextureID)(uintptr_t)sourceID, ImVec2(fbo.getWidth(), fbo.getHeight()));
+	}
+	ImGui::End();
+
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::_ImGui::drawImg(const ofImage &img, GLuint &sourceID, float scale, string name, ImGuiWindowFlags flag) {
+
+	if (!img.isAllocated()) return;
+
+	glDeleteTextures(1, &sourceID);
+	ofPixels pix = img.getPixels();
+	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
+	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
+	
+	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() * scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
+	{
+		ImGui::Image((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale));
+	}
+	ImGui::End();
+
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::_ImGui::drawImgAsButton(const ofImage &img, GLuint &sourceID, void (*fn)(), float scale, string name, ImGuiWindowFlags flag) {
+
+	glDeleteTextures(1, &sourceID);
+	ofPixels pix = img.getPixels();
+	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
+	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
+
+	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() *scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
+	{
+		if (ImGui::ImageButton((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale))) {
+			fn();
+		}
+	}
+	ImGui::End();
+
+}
+
+
+//--------------------------------------------------------------
+// GL
+//--------------------------------------------------------------
+
+//--------------------------------------------------------------
+GLuint ofxMyUtil::GL::loadTextureImage2D(unsigned char * pix, int width, int height) {
+
+	GLint last_texture;
+	glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
+	GLuint new_texture;
+	glGenTextures(1, &new_texture);
+	glBindTexture(GL_TEXTURE_2D, new_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(
+		GL_TEXTURE_2D,
+		0,
+		GL_RGBA,
+		width, height,
+		0,
+		GL_RGBA,
+		GL_UNSIGNED_BYTE,
+		pix
+	);
+	glBindTexture(GL_TEXTURE_2D, last_texture);
+	return new_texture;
+
+}
+
+//--------------------------------------------------------------
+// SP
+//--------------------------------------------------------------
+
+//--------------------------------------------------------------
+bool ofxMyUtil::SP::loadArray2Float(const string &str, float *Array2) {
+	
+	vector<string> _temp = ofSplitString(str, ",");
+	if (2 != _temp.size()) return 0;
+
+	Array2[0] = ofToFloat(_temp[0]);
+	Array2[1] = ofToFloat(_temp[1]);
+	return 1;
+
+}
+
+//--------------------------------------------------------------
+bool ofxMyUtil::SP::loadArray3Float(const string &str, float *Array3) {
+
+	vector<string> _temp = ofSplitString(str, ",");
+	if (3 != _temp.size())return 0;
+
+	Array3[0] = ofToFloat(_temp[0]);
+	Array3[1] = ofToFloat(_temp[1]);
+	Array3[2] = ofToFloat(_temp[2]);
+	return 1;
 }
