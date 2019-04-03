@@ -7,22 +7,43 @@ using namespace std;
 //--------------------------------------------------------------
 
 //--------------------------------------------------------------
-void ofxMyUtil::File::bufferToJsonFile(const ofBuffer &buf, const string &savePath = "result.json", const bool& console = false) {
+void ofxMyUtil::File::bufferToJsonFile(const ofBuffer &buf, string savePath, bool pretty) {
 
-	ofxJSONElement json;
-	//ofJson json;
-	json.parse(buf.getText());
-
-	if (console) cout << json << endl;
-
-	//if (ofSaveJson(savePath, json)) cout << "save seccess \"" << savePath << "\"" << endl;
-	if (json.save(savePath, true)) cout << "save seccess \"" << savePath << "\"" << endl;
-	else cout << "save faild \"" << savePath << "\"" << endl;;
+	bufferToJsonFile(buf.getText(), savePath, pretty);
 
 }
 
 //--------------------------------------------------------------
-bool ofxMyUtil::File::saveImageAs(const ofFbo &fbo, const string &savePath, ofImageType type = OF_IMAGE_COLOR) {
+void ofxMyUtil::File::bufferToJsonFile(const string &buf, string savePath, bool pretty) {
+
+	try
+	{
+		//ofxJSONElement json;
+		auto json = ofJson::parse(buf);
+		
+		//json.parse(buf.getText());
+		if (pretty) {
+			if (ofSavePrettyJson(savePath, json)) cout << "save seccess \"" << savePath << "\"" << endl;
+			else cout << "save faild \"" << savePath << "\"" << endl;
+		}
+		else {
+			if (ofSaveJson(savePath, json)) cout << "save seccess \"" << savePath << "\"" << endl;
+			//if (json.save(savePath, true)) cout << "save seccess \"" << savePath << "\"" << endl;
+			else cout << "save faild \"" << savePath << "\"" << endl;;
+		}
+
+	}
+	catch (const std::exception&)
+	{
+		Console::chengeConsollColor(12);
+		cout << "json parse error" << endl;
+		Console::chengeConsollColor(7);
+	}
+
+}
+
+//--------------------------------------------------------------
+bool ofxMyUtil::File::saveImageAs(const ofFbo &fbo, string savePath, ofImageType type = OF_IMAGE_COLOR) {
 
 	ofPixels pix;
 	pix.allocate(fbo.getWidth(), fbo.getHeight(), type);
@@ -218,12 +239,12 @@ bool ofxMyUtil::Event::rectButtonClickDetect(ofRectangle rect, int mouseX, int m
 
 
 //--------------------------------------------------------------
-bool ofxMyUtil::Event::rectButtonClickDetect(int x, int y, int w, int h, int mouseX, int mouseY) {
+bool ofxMyUtil::Event::rectButtonClickDetect(int rect_x, int rect_y, int rect_w, int rect_h, int mouseX, int mouseY) {
 
-	if (x <= mouseX &&
-		mouseX <= x + w &&
-		y <= mouseY &&
-		mouseY <= y + h)
+	if (rect_x <= mouseX &&
+		mouseX <= rect_x + rect_w &&
+		rect_y <= mouseY &&
+		mouseY <= rect_y + rect_h)
 	{
 		return 1;
 	}
@@ -234,9 +255,9 @@ bool ofxMyUtil::Event::rectButtonClickDetect(int x, int y, int w, int h, int mou
 }
 
 //--------------------------------------------------------------
-bool ofxMyUtil::Event::circleButtonClickDetect(int x, int y, float radius, int mouseX, int mouseY) {
+bool ofxMyUtil::Event::circleButtonClickDetect(int circle_x, int circle_y, float radius, int mouseX, int mouseY) {
 
-	if (ofDist(x, y, mouseX, mouseY) < radius) return 1;
+	if (ofDist(circle_x, circle_y, mouseX, mouseY) < radius) return 1;
 	else return 0;
 
 }
@@ -322,19 +343,25 @@ int ofxMyUtil::IO::getIpHost() {
 //--------------------------------------------------------------
 
 //--------------------------------------------------------------
+void ofxMyUtil::_ImGui::BasicInfos() {
+
+	ImGui::Text("ip address : %s", ofxMyUtil::IO::getIpAddress().c_str());
+	ImGui::Text("framerate :  %s", ofToString(ofGetFrameRate(), 4).c_str());
+
+	ImGui::Text("position : x %i, y %i", ofGetWindowPositionX(), ofGetWindowPositionY());
+	ImGui::Text("size : x %i, y %i", ofGetWindowWidth(), ofGetWindowHeight());
+
+}
+
+//--------------------------------------------------------------
 void ofxMyUtil::_ImGui::BasicInfos(const std::string &name, ImGuiWindowFlags flags) {
 
-	ImGui::Begin(name.c_str(), 0, flags);
-	if (ImGui::CollapsingHeader("_ImGui Basic Infos", 0)) {
-
-		ImGui::Text("ip address : %s", ofxMyUtil::IO::getIpAddress().c_str());
-		ImGui::Text("framerate :  %s", ofToString(ofGetFrameRate(), 4).c_str());
+	if (ImGui::Begin(name.c_str(), 0, flags)) {
 		
-		ImGui::Text("position : x %.2f, y %.2f", ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
-		ImGui::Text("size : x %.2f, y %.2f", ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
+		BasicInfos();
+		ImGui::End();
 
 	}
-	ImGui::End();
 
 }
 
@@ -449,7 +476,12 @@ void ofxMyUtil::_ImGui::ImGuiWindowSetCondSettings::ImGui(const string &name) {
 
 //スケールを縮尺する場合、なぜか0.2とか0.3とかの少数第一位までしか指定できない
 //--------------------------------------------------------------
-void ofxMyUtil::_ImGui::drawFbo(const ofFbo &fbo, GLuint &sourceID, string name, ImGuiWindowFlags flag) {
+void ofxMyUtil::_ImGui::drawFbo(
+	const ofFbo &fbo,
+	GLuint &sourceID, 
+	string name, 
+	ImGuiWindowFlags flag
+) {
 
 	if (!fbo.isAllocated()) return;
 	
@@ -470,7 +502,13 @@ void ofxMyUtil::_ImGui::drawFbo(const ofFbo &fbo, GLuint &sourceID, string name,
 }
 
 //--------------------------------------------------------------
-void ofxMyUtil::_ImGui::drawImg(const ofImage &img, GLuint &sourceID, float scale, string name, ImGuiWindowFlags flag) {
+void ofxMyUtil::_ImGui::drawImg(
+	const ofImage &img, 
+	GLuint &sourceID, 
+	float scale, 
+	string name, 
+	ImGuiWindowFlags flag
+) {
 
 	if (!img.isAllocated()) return;
 
@@ -488,7 +526,38 @@ void ofxMyUtil::_ImGui::drawImg(const ofImage &img, GLuint &sourceID, float scal
 }
 
 //--------------------------------------------------------------
-void ofxMyUtil::_ImGui::drawImgAsButton(const ofImage &img, GLuint &sourceID, void (*fn)(), float scale, string name, ImGuiWindowFlags flag) {
+void ofxMyUtil::_ImGui::drawImgAsButton(
+	const ofImage &img, 
+	GLuint &sourceID, 
+	void (*fn)(), 
+	float scale, 
+	string name, 
+	ImGuiWindowFlags flag
+) {
+	glDeleteTextures(1, &sourceID);
+	ofPixels pix = img.getPixels();
+	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
+	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
+
+	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() *scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
+	{
+		if (ImGui::ImageButton((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale))) {
+			fn();
+		}
+	}
+	ImGui::End();
+
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::_ImGui::drawImgAsButton(
+	const ofImage &img,
+	GLuint &sourceID,
+	function<void()> fn,
+	float scale,
+	string name,
+	ImGuiWindowFlags flag
+) {
 
 	glDeleteTextures(1, &sourceID);
 	ofPixels pix = img.getPixels();
@@ -530,9 +599,96 @@ GLuint ofxMyUtil::GL::loadTextureImage2D(unsigned char * pix, int width, int hei
 		GL_UNSIGNED_BYTE,
 		pix
 	);
+
 	glBindTexture(GL_TEXTURE_2D, last_texture);
 	return new_texture;
 
+}
+
+
+//--------------------------------------------------------------
+ofxMyUtil::GL::CircleGuide::CircleGuide() {}
+
+//--------------------------------------------------------------
+ofxMyUtil::GL::CircleGuide::CircleGuide(float px, float py, float radius) {
+
+}
+
+//--------------------------------------------------------------
+ofxMyUtil::GL::CircleGuide::CircleGuide(const glm::vec2& pos, float radius) {
+
+}
+
+//--------------------------------------------------------------
+ofxMyUtil::GL::CircleGuide::CircleGuide(const CircleGuide& circle) {
+
+}
+
+//--------------------------------------------------------------
+ofxMyUtil::GL::CircleGuide::~CircleGuide() {}
+
+//--------------------------------------------------------------
+void ofxMyUtil::GL::CircleGuide::set(float px, float py, float radius) {
+	p.x = px;
+	p.y = py;
+	this->radius = radius;
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::GL::CircleGuide::set(const glm::vec2 &p, float radius) {
+	this->p = p;
+	this->radius = radius;
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::GL::CircleGuide::set(const CircleGuide &circle) {
+	p = circle.p;
+	radius = circle.radius;
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::GL::CircleGuide::setX(float px) {
+	p.x = px;
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::GL::CircleGuide::setY(float py) {
+	p.y = py;
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::GL::CircleGuide::setRadius(float radius) {
+	this->radius = radius;
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::GL::CircleGuide::setPosition(float px, float py) {
+	p = glm::vec2(px, py);
+}
+
+//--------------------------------------------------------------
+void ofxMyUtil::GL::CircleGuide::setPosition(const glm::vec2 &p) {
+	this->p = p;
+}
+
+//--------------------------------------------------------------
+float ofxMyUtil::GL::CircleGuide::getX() {
+	return p.x;
+}
+
+//--------------------------------------------------------------
+float ofxMyUtil::GL::CircleGuide::getY() {
+	return p.y;
+}
+
+//--------------------------------------------------------------
+glm::vec2 ofxMyUtil::GL::CircleGuide::getPos() {
+	return p;
+}
+
+//--------------------------------------------------------------
+float ofxMyUtil::GL::CircleGuide::getRadius() {
+	return radius;
 }
 
 //--------------------------------------------------------------
@@ -561,4 +717,17 @@ bool ofxMyUtil::SP::loadArray3Float(const string &str, float *Array3) {
 	Array3[1] = ofToFloat(_temp[1]);
 	Array3[2] = ofToFloat(_temp[2]);
 	return 1;
+}
+
+//--------------------------------------------------------------
+template<typename T>
+T ofxMyUtil::SP:: isNaNCheck(T val, T defaultVal) {
+	if (isnan(val)) return defaultVal;
+	return val;
+}
+
+template<>
+float ofxMyUtil::SP::isNaNCheck(float val, float defaultVal) {
+	if (isnan(val)) return defaultVal;
+	return val;
 }
