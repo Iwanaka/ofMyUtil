@@ -69,10 +69,9 @@ ImGuiWindowFlags im::ImGuiWindowFlagsSettings::getImGuiWindowFlags() {
 
 //--------------------------------------------------------------
 void im::ImGuiWindowFlagsSettings::ImGui(const string &name) {
-
+	
 	ImGuiWindowFlags window_flags = 0;
 	if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
-	if (no_border)    window_flags |= ImGuiWindowFlags_ShowBorders;
 	if (no_resize)    window_flags |= ImGuiWindowFlags_NoResize;
 	if (no_move)      window_flags |= ImGuiWindowFlags_NoMove;
 	if (no_scrollbar) window_flags |= ImGuiWindowFlags_NoScrollbar;
@@ -84,7 +83,6 @@ void im::ImGuiWindowFlagsSettings::ImGui(const string &name) {
 	ImGui::PushID(name.c_str());
 	if (ImGui::CollapsingHeader("_ImGui window style settings", 0)) {
 		ImGui::Checkbox("No titlebar", &no_titlebar);;
-		ImGui::Checkbox("No border", &no_border);;
 		ImGui::Checkbox("No resize", &no_resize);
 		ImGui::Checkbox("No move", &no_move);;
 		ImGui::Checkbox("No scrollbar", &no_scrollbar);;
@@ -111,7 +109,6 @@ void im::ImGuiWindowFlagsSettings::loadSettings(const string &path) {
 
 		if (2 == temp.size()) {
 			if ("no_titlebar" == temp[0]) no_titlebar = ofToBool(temp[1]);
-			if ("no_border" == temp[0]) no_border = ofToBool(temp[1]);
 			if ("no_resize" == temp[0]) no_resize = ofToBool(temp[1]);
 			if ("no_move" == temp[0]) no_move = ofToBool(temp[1]);
 			if ("no_scrollbar" == temp[0]) no_scrollbar = ofToBool(temp[1]);
@@ -126,7 +123,6 @@ void im::ImGuiWindowFlagsSettings::saveSettings(const string &path) {
 
 	stringstream ss;
 	ss << "no_titlebar:" << no_titlebar << "\n";
-	ss << "no_border:" << no_border << "\n";
 	ss << "no_resize:" << no_resize << "\n";
 	ss << "no_move:" << no_move << "\n";
 	ss << "no_scrollbar:" << no_scrollbar << "\n";
@@ -140,13 +136,13 @@ void im::ImGuiWindowFlagsSettings::saveSettings(const string &path) {
 //--------------------------------------------------------------
 // ImGuiWindowSetCondSettings
 //--------------------------------------------------------------
-void im::ImGuiWindowSetCondSettings::changeState(const ImGuiSetCond_ &state) {
+void im::ImGuiWindowSetCondSettings::changeState(const int &state) {
 	value = state;
 }
 
 //--------------------------------------------------------------
-ImGuiSetCond_ im::ImGuiWindowSetCondSettings::getSetCondState() {
-	return (ImGuiSetCond_)value;
+int im::ImGuiWindowSetCondSettings::getSetCondState() {
+	return value;
 }
 
 //--------------------------------------------------------------
@@ -156,11 +152,11 @@ void im::ImGuiWindowSetCondSettings::ImGui(const string &name) {
 	{
 		if (ImGui::CollapsingHeader("_ImGui window setCond settings")) {
 
-			ImGui::RadioButton("Always", &value, (int)ImGuiSetCond_::ImGuiSetCond_Always);
-			ImGui::RadioButton("Appearing", &value, (int)ImGuiSetCond_::ImGuiSetCond_Appearing);
-			ImGui::RadioButton("FirstUseEver", &value, (int)ImGuiSetCond_::ImGuiSetCond_FirstUseEver);
-			ImGui::RadioButton("Once", &value, (int)ImGuiSetCond_::ImGuiSetCond_Once);
-
+			ImGui::RadioButton("Always", &value, ImGuiSetCond_Always);
+			ImGui::RadioButton("Appearing", &value, ImGuiSetCond_Appearing);
+			ImGui::RadioButton("FirstUseEver", &value, ImGuiSetCond_FirstUseEver);
+			ImGui::RadioButton("Once", &value, ImGuiSetCond_Once);
+			
 		}
 	}
 	ImGui::End();

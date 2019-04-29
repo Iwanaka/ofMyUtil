@@ -1,5 +1,17 @@
 #include "ofxMyUtilMedia.h"
-#include <winsock2.h>
+
+#if defined( __WIN32__ ) || defined( _WIN32 )
+#define WIN32
+#endif
+
+#ifdef WIN32
+
+	#include <winsock2.h>
+
+#else
+	#include <sys/types.h>
+	#include <semaphore.h>
+#endif
 
 using namespace ofxMyUtil;
 //--------------------------------------------------------------
@@ -7,6 +19,8 @@ using namespace ofxMyUtil;
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 std::string Media::getIpAddress() {
+
+#ifdef WIN32
 
 	int i;
 	HOSTENT *lpHost;
@@ -28,10 +42,19 @@ std::string Media::getIpAddress() {
 
 	return std::string(szIP);
 
+#else
+
+	//mac or linux
+	return std::string();
+
+#endif
+
 }
 
 //--------------------------------------------------------------
-int Media::getIpHost() {
+void Media::showIpHost() {
+
+#ifdef WIN32
 
 	int i;
 	HOSTENT *lpHost;
@@ -49,6 +72,9 @@ int Media::getIpHost() {
 		printf("IP Adress : %s\n", szIP);
 	}
 
-	return 0;
+#else
+
+#endif
+
 
 }

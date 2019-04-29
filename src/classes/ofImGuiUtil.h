@@ -61,7 +61,6 @@ namespace ofxMyUtil {
 		public:
 			ImGuiWindowFlagsSettings() :
 				no_titlebar(false),
-				no_border(false),
 				no_resize(false),
 				no_move(false),
 				no_scrollbar(false),
@@ -76,7 +75,7 @@ namespace ofxMyUtil {
 
 		private:
 			ImGuiWindowFlags flags;
-			bool no_titlebar, no_border, no_resize, no_move, no_scrollbar, no_collapse, no_menu;
+			bool no_titlebar, no_resize, no_move, no_scrollbar, no_collapse, no_menu;
 		};
 
 
@@ -86,10 +85,10 @@ namespace ofxMyUtil {
 		class ImGuiWindowSetCondSettings {
 		public:
 			ImGuiWindowSetCondSettings() :
-				value((int)ImGuiSetCond_::ImGuiSetCond_Appearing) {};
+				value((int)ImGuiSetCond_Appearing) {};
 			~ImGuiWindowSetCondSettings() {};
-			void changeState(const ImGuiSetCond_ &state);
-			ImGuiSetCond_ getSetCondState();
+			void changeState(const int &state);
+			int getSetCondState();
 			void ImGui(const std::string &name);
 		private:
 			int value;

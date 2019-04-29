@@ -9,7 +9,7 @@ namespace ofxMyUtil {
 	namespace Media {
 
 		std::string getIpAddress();	
-		int getIpHost();
+		void showIpHost();
 
 	}
 }
