@@ -11,38 +11,13 @@ using namespace ofxMyUtil;
 using namespace std;
 
 //--------------------------------------------------------------
-bool SP::loadArray2Float(const string &str, float *Array2) {
-
-	vector<string> _temp = ofSplitString(str, ",");
-	if (2 != _temp.size()) return 0;
-
-	Array2[0] = ofToFloat(_temp[0]);
-	Array2[1] = ofToFloat(_temp[1]);
-	return 1;
-
-}
-
-//--------------------------------------------------------------
-bool SP::loadArray3Float(const string &str, float *Array3) {
-
-	vector<string> _temp = ofSplitString(str, ",");
-	if (3 != _temp.size())return 0;
-
-	Array3[0] = ofToFloat(_temp[0]);
-	Array3[1] = ofToFloat(_temp[1]);
-	Array3[2] = ofToFloat(_temp[2]);
-	return 1;
-
-}
-
-//--------------------------------------------------------------
 void im::BasicInfos() {
 
 	ImGui::Text("ip address : %s", Media::getIpAddress().c_str());
 	ImGui::Text("framerate :  %s", ofToString(ofGetFrameRate(), 4).c_str());
 
-	ImGui::Text("position : x %i, y %i", ofGetWindowPositionX(), ofGetWindowPositionY());
-	ImGui::Text("size : x %i, y %i", ofGetWindowWidth(), ofGetWindowHeight());
+	//ImGui::Text("main window position : x %i, y %i", ofGetWindowPositionX(), ofGetWindowPositionY());
+	//ImGui::Text("main window size : x %i, y %i", ofGetWindowWidth(), ofGetWindowHeight());
 
 }
 
@@ -55,7 +30,143 @@ void im::BasicInfos(const std::string &name, ImGuiWindowFlags flags) {
 		ImGui::End();
 
 	}
+}
 
+//スケールを縮尺する場合、なぜか0.2とか0.3とかの少数第一位までしか指定できない
+//--------------------------------------------------------------
+void im::drawFbo(
+	const ofFbo &fbo,
+	GLuint &sourceID,
+	string name,
+	ImGuiWindowFlags flag
+) {
+
+	if (!fbo.isAllocated()) return;
+
+	ofPixels pix;
+	pix.clear();
+
+	fbo.readToPixels(pix);
+	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
+	glDeleteTextures(1, &sourceID);
+	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), fbo.getWidth(), fbo.getHeight());
+
+	ImGui::Begin(name.c_str(), 0, ImVec2(fbo.getWidth() * 1.1, fbo.getHeight()* 1.1f), .5f, flag);
+	{
+		ImGui::Image((ImTextureID)(uintptr_t)sourceID, ImVec2(fbo.getWidth(), fbo.getHeight()));
+	}
+	ImGui::End();
+
+}
+
+//--------------------------------------------------------------
+void im::drawImg(
+	const ofImage &img,
+	GLuint &sourceID,
+	float scale,
+	string name,
+	ImGuiWindowFlags flag
+) {
+
+	if (!img.isAllocated()) return;
+
+	glDeleteTextures(1, &sourceID);
+	ofPixels pix = img.getPixels();
+	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
+	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
+
+	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() * scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
+	{
+		ImGui::Image((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale));
+	}
+	ImGui::End();
+
+}
+
+//--------------------------------------------------------------
+void im::drawImgAsButton(
+	const ofImage &img,
+	GLuint &sourceID,
+	void(*fn)(),
+	float scale,
+	string name,
+	ImGuiWindowFlags flag
+) {
+	glDeleteTextures(1, &sourceID);
+	ofPixels pix = img.getPixels();
+	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
+	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
+
+	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() *scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
+	{
+		if (ImGui::ImageButton((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale))) {
+			fn();
+		}
+	}
+	ImGui::End();
+
+}
+
+//--------------------------------------------------------------
+void im::drawImgAsButton(
+	const ofImage &img,
+	GLuint &sourceID,
+	function<void()> fn,
+	float scale,
+	string name,
+	ImGuiWindowFlags flag
+) {
+
+	glDeleteTextures(1, &sourceID);
+	ofPixels pix = img.getPixels();
+	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
+	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
+
+	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() *scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
+	{
+		if (ImGui::ImageButton((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale))) {
+			fn();
+		}
+	}
+	ImGui::End();
+
+}
+
+//--------------------------------------------------------------
+// ImGuiWindowSetCondSettings
+//--------------------------------------------------------------
+void im::ImGuiLogWindow::addText(std::string str) {
+	_log.push_back(str);
+}
+
+//--------------------------------------------------------------
+void im::ImGuiLogWindow::setMaxLogSize(unsigned long size) {
+	maxSize = size;
+}
+
+//--------------------------------------------------------------
+void im::ImGuiLogWindow::isShowWindow(bool isShow) {
+	this->isShow = isShow;
+}
+
+//--------------------------------------------------------------
+void im::ImGuiLogWindow::ImGui(const std::string &name) {
+
+	if (maxSize < _log.size()) _log.erase(_log.begin());
+
+	if (!isShow) return;
+	ImGui::Begin(name.c_str()); 
+	if (ImGui::Button("Hide", ImVec2(75, 50))) isShow = false;
+	ImGui::BeginChild("log");
+	vector<string> _l = _log;
+	for each (string l in	_l) ImGui::TextWrapped("%s", l.c_str());
+	ImGui::EndChild();
+	ImGui::End();
+}
+
+//--------------------------------------------------------------
+void im::ImGuiLogWindow::clear() {
+	_log.clear();
 }
 
 //--------------------------------------------------------------
@@ -157,106 +268,6 @@ void im::ImGuiWindowSetCondSettings::ImGui(const string &name) {
 			ImGui::RadioButton("FirstUseEver", &value, ImGuiSetCond_FirstUseEver);
 			ImGui::RadioButton("Once", &value, ImGuiSetCond_Once);
 			
-		}
-	}
-	ImGui::End();
-
-}
-
-//スケールを縮尺する場合、なぜか0.2とか0.3とかの少数第一位までしか指定できない
-//--------------------------------------------------------------
-void im::drawFbo(
-	const ofFbo &fbo,
-	GLuint &sourceID,
-	string name,
-	ImGuiWindowFlags flag
-) {
-
-	if (!fbo.isAllocated()) return;
-
-	ofPixels pix;
-	pix.clear();
-
-	fbo.readToPixels(pix);
-	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
-	glDeleteTextures(1, &sourceID);
-	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), fbo.getWidth(), fbo.getHeight());
-
-	ImGui::Begin(name.c_str(), 0, ImVec2(fbo.getWidth() * 1.1, fbo.getHeight()* 1.1f), .5f, flag);
-	{
-		ImGui::Image((ImTextureID)(uintptr_t)sourceID, ImVec2(fbo.getWidth(), fbo.getHeight()));
-	}
-	ImGui::End();
-
-}
-
-//--------------------------------------------------------------
-void im::drawImg(
-	const ofImage &img,
-	GLuint &sourceID,
-	float scale,
-	string name,
-	ImGuiWindowFlags flag
-) {
-
-	if (!img.isAllocated()) return;
-
-	glDeleteTextures(1, &sourceID);
-	ofPixels pix = img.getPixels();
-	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
-	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
-
-	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() * scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
-	{
-		ImGui::Image((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale));
-	}
-	ImGui::End();
-
-}
-
-//--------------------------------------------------------------
-void im::drawImgAsButton(
-	const ofImage &img,
-	GLuint &sourceID,
-	void(*fn)(),
-	float scale,
-	string name,
-	ImGuiWindowFlags flag
-) {
-	glDeleteTextures(1, &sourceID);
-	ofPixels pix = img.getPixels();
-	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
-	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
-
-	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() *scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
-	{
-		if (ImGui::ImageButton((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale))) {
-			fn();
-		}
-	}
-	ImGui::End();
-
-}
-
-//--------------------------------------------------------------
-void im::drawImgAsButton(
-	const ofImage &img,
-	GLuint &sourceID,
-	function<void()> fn,
-	float scale,
-	string name,
-	ImGuiWindowFlags flag
-) {
-
-	glDeleteTextures(1, &sourceID);
-	ofPixels pix = img.getPixels();
-	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
-	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
-
-	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() *scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
-	{
-		if (ImGui::ImageButton((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale))) {
-			fn();
 		}
 	}
 	ImGui::End();

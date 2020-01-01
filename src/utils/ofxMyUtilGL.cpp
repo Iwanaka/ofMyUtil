@@ -3,10 +3,10 @@
 //--------------------------------------------------------------
 // ofxMyUtil GL
 //--------------------------------------------------------------
-
 using namespace ofxMyUtil;
+
 //--------------------------------------------------------------
-GLuint ofxMyUtil::GL::loadTextureImage2D(unsigned char * pix, int width, int height) {
+GLuint GL::loadTextureImage2D(unsigned char * pix, int width, int height) {
 
 	GLint last_texture;
 	glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);

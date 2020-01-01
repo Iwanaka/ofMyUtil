@@ -5,8 +5,8 @@
 //--------------------------------------------------------------
 // Event
 //--------------------------------------------------------------
-using namespace ofxMyUtil;
 using namespace std;
+using namespace ofxMyUtil;
 
 //--------------------------------------------------------------
 bool Event::rectButtonClickDetect(ofRectangle rect, int mouseX, int mouseY) {
@@ -56,13 +56,14 @@ bool Event::ellipseButtonClickDetect(ofVec4f ellipse, int mouseX, int mouseY) {
 
 //--------------------------------------------------------------
 bool Event::ellipseButtonClickDetect(
-	int ellipse_x, 
-	int ellipse_y, 
-	int ellipse_w, 
+	int ellipse_x,
+	int ellipse_y,
+	int ellipse_w,
 	int ellipse_h,
-	int mouseX, 
+	int mouseX,
 	int mouseY) {
 
 	return ellipseButtonClickDetect(ofVec4f(ellipse_x, ellipse_y, ellipse_w, ellipse_h), mouseX, mouseY);
 
 }
+

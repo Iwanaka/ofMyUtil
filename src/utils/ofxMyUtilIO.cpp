@@ -38,7 +38,7 @@ bool IO::fboToFile(const ofFbo &fbo, string savePath, ofImageType type, ofImageQ
 	ofPixels pix;
 	pix.allocate(fbo.getWidth(), fbo.getHeight(), type);
 	fbo.readToPixels(pix);
-	
+
 	return ofSaveImage(pix, savePath, quality);
 
 }

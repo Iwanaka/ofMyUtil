@@ -8,27 +8,20 @@
 
 namespace ofxMyUtil {
 
-	//--------------------------------------------------------------
-	namespace SP {
-		
-		bool loadArray2Float(const std::string &str, float *Array2);
-		bool loadArray3Float(const std::string &str, float *Array3);
-
-	}
-
-
 	namespace im {
 
-
+		//ImGui内に基本情報表示
 		void BasicInfos();
 		void BasicInfos(const std::string &name, ImGuiWindowFlags flags = 0);
 
+		//ImGui内にFboを表示
 		void drawFbo(
 			const ofFbo &fbo,
 			GLuint &sourceID,
 			std::string name = "fbo",
 			ImGuiWindowFlags flag = 0);
 
+		//ImGui内に画像を表示
 		void drawImg(
 			const ofImage &img,
 			GLuint &sourceID,
@@ -36,7 +29,7 @@ namespace ofxMyUtil {
 			std::string name = "image",
 			ImGuiWindowFlags flag = 0);
 
-		//静的な関数ならこれで呼べるけどtemplateかfunctionでやったほうが良さそう
+		//ImGui内にボタンとして画像を表示、関数ポインタでコールバック
 		void drawImgAsButton(
 			const ofImage &img,
 			GLuint &sourceID,
@@ -45,6 +38,7 @@ namespace ofxMyUtil {
 			std::string name = "image button",
 			ImGuiWindowFlags flag = 0);
 		
+		//ImGui内にボタンとして画像を表示、functionでコールバック
 		void drawImgAsButton(
 			const ofImage &img,
 			GLuint &sourceID,
@@ -54,9 +48,28 @@ namespace ofxMyUtil {
 			ImGuiWindowFlags flag = 0);
 
 
-
+		//--------------------------------------------------------------
+		//ログ表示
+		class ImGuiLogWindow {
+		public:
+			ImGuiLogWindow() : 
+				isShow(true),
+				maxSize(1000),
+				_log(std::vector<std::string>()) {}
+			~ImGuiLogWindow() {}
+			void addText(std::string str);
+			void isShowWindow(bool isShow);
+			void setMaxLogSize(unsigned long size);
+			void ImGui(const std::string &name);
+			void clear();
+		private:
+			bool isShow;
+			unsigned long maxSize;
+			std::vector<std::string> _log;
+		};
 
 		//--------------------------------------------------------------
+		//Windowの詳細設定クラス
 		class ImGuiWindowFlagsSettings {
 		public:
 			ImGuiWindowFlagsSettings() :
@@ -79,9 +92,8 @@ namespace ofxMyUtil {
 		};
 
 
-
-
 		//--------------------------------------------------------------
+		//Windowの位置の振る舞い設定クラス
 		class ImGuiWindowSetCondSettings {
 		public:
 			ImGuiWindowSetCondSettings() :

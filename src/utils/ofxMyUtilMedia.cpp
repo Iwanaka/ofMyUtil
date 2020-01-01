@@ -1,5 +1,10 @@
 #include "ofxMyUtilMedia.h"
 
+//--------------------------------------------------------------
+// ofxMyUtil Media
+//--------------------------------------------------------------
+using namespace ofxMyUtil;
+
 #if defined( __WIN32__ ) || defined( _WIN32 )
 #define WIN32
 #endif
@@ -13,10 +18,7 @@
 	#include <semaphore.h>
 #endif
 
-using namespace ofxMyUtil;
-//--------------------------------------------------------------
-// ofxMyUtil Media
-//--------------------------------------------------------------
+
 //--------------------------------------------------------------
 std::string Media::getIpAddress() {
 
@@ -75,6 +77,4 @@ void Media::showIpHost() {
 #else
 
 #endif
-
-
 }
