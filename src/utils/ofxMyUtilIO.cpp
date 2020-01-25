@@ -14,6 +14,12 @@ bool IO::bufJsonToFile(const ofBuffer &buf, string savePath, bool pretty) {
 }
 
 //--------------------------------------------------------------
+// *** sample code ***
+// stringstream ss;
+// ss << "{\"One\":{\"a\":1,\"b\":\"test\"}}";
+// ofBuffer buf(ss.str().c_str(), ss.str().size());
+// ofxMyUtil::IO::jsonToFile(buf);
+//--------------------------------------------------------------
 bool IO::jsonToFile(const string &str, string savePath, bool pretty) {
 
 	try

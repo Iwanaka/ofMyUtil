@@ -53,17 +53,14 @@ namespace ofxMyUtil {
 		class ImGuiLogWindow {
 		public:
 			ImGuiLogWindow() : 
-				isShow(true),
 				maxSize(1000),
 				_log(std::vector<std::string>()) {}
 			~ImGuiLogWindow() {}
 			void addText(std::string str);
-			void isShowWindow(bool isShow);
 			void setMaxLogSize(unsigned long size);
 			void ImGui(const std::string &name);
 			void clear();
 		private:
-			bool isShow;
 			unsigned long maxSize;
 			std::vector<std::string> _log;
 		};

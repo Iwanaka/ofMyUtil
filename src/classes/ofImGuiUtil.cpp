@@ -145,18 +145,9 @@ void im::ImGuiLogWindow::setMaxLogSize(unsigned long size) {
 }
 
 //--------------------------------------------------------------
-void im::ImGuiLogWindow::isShowWindow(bool isShow) {
-	this->isShow = isShow;
-}
-
-//--------------------------------------------------------------
 void im::ImGuiLogWindow::ImGui(const std::string &name) {
-
 	if (maxSize < _log.size()) _log.erase(_log.begin());
-
-	if (!isShow) return;
 	ImGui::Begin(name.c_str()); 
-	if (ImGui::Button("Hide", ImVec2(75, 50))) isShow = false;
 	ImGui::BeginChild("log");
 	vector<string> _l = _log;
 	for each (string l in	_l) ImGui::TextWrapped("%s", l.c_str());
