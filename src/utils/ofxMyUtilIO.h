@@ -4,6 +4,7 @@
 #include "ofFbo.h"
 #include "ofTexture.h"
 #include "ofImage.h"
+#include "ofJson.h"
 
 //--------------------------------------------------------------
 // ofxMyUtil IO
@@ -35,6 +36,15 @@ namespace ofxMyUtil {
 		bool createFile(const std::string& path, const std::stringstream& Args);
 		bool createFile(const std::string&path, const std::string& Args);
 
-	}
+		//template <typename T>
+		//bool loadJsonAsKey(const nlohmann::json::value_type &j, T& val, T initVal) {
+		//	if (j.is_null()) { 
+		//		val = initVal; return false; 
+		//	}
+		//	else { 
+		//		val = j.get<T>(); return true; 
+		//	}
+		//}
 
+	}
 }

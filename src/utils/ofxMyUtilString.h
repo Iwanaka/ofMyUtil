@@ -13,6 +13,10 @@ namespace ofxMyUtil {
 			"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 			"abcdefghijklmnopqrstuvwxyz";
 
+		std::string wstring_to_string(std::wstring wstr);
+		std::wstring string_to_wstring(std::string str);
+
+		std::string toSha256(std::string str);
 		std::string adjustFileNo(const unsigned int& currentNo, const unsigned int& digit);
 		std::string generateRandomText(const unsigned int &length);
 		std::string generateUUID();

@@ -1,6 +1,12 @@
 #include "ofxMyUtilString.h"
-#include <algorithm>
+
+#include <cstring>
 #include <cstdlib>
+#include <algorithm>
+#include <locale>
+#include <codecvt>
+
+#include "openssl/sha.h"
 #include "ofUtils.h"
 
 //--------------------------------------------------------------
@@ -9,6 +15,35 @@
 
 using namespace std;
 using namespace ofxMyUtil;
+
+std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> strconverter;
+
+//--------------------------------------------------------------
+string String::wstring_to_string(std::wstring wstr) {
+	return strconverter.to_bytes(wstr);
+}
+//--------------------------------------------------------------
+wstring String::string_to_wstring(std::string str) {
+	return strconverter.from_bytes(str);
+}
+
+//--------------------------------------------------------------
+std::string String::toSha256(std::string str) {
+
+	unsigned char hash[SHA256_DIGEST_LENGTH];
+	SHA256_CTX sha256;
+	SHA256_Init(&sha256);
+	SHA256_Update(&sha256, str.c_str(), str.length());
+	SHA256_Final(hash, &sha256);
+
+	string output = "";
+	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+		output += ofToHex(hash[i]);
+	}
+	return output;
+
+}
+
 //--------------------------------------------------------------
 string String::adjustFileNo(const unsigned int& currentNo, const unsigned int& digit) {
 

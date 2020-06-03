@@ -13,11 +13,8 @@ using namespace std;
 //--------------------------------------------------------------
 void im::BasicInfos() {
 
-	ImGui::Text("ip address : %s", Media::getIpAddress().c_str());
-	ImGui::Text("framerate :  %s", ofToString(ofGetFrameRate(), 4).c_str());
-
-	//ImGui::Text("main window position : x %i, y %i", ofGetWindowPositionX(), ofGetWindowPositionY());
-	//ImGui::Text("main window size : x %i, y %i", ofGetWindowWidth(), ofGetWindowHeight());
+	ImGui::Text("My IP Address : %s", Media::getIpAddress().c_str());
+	ImGui::Text("FPS :  %s", ofToString(ofGetFrameRate(), 4).c_str());
 
 }
 
@@ -30,6 +27,14 @@ void im::BasicInfos(const std::string &name, ImGuiWindowFlags flags) {
 		ImGui::End();
 
 	}
+}
+
+//--------------------------------------------------------------
+void im::BasicInfosWindow() {
+
+	ImGui::Text("this window size : x %f, y %f", ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
+	ImGui::Text("this window position : x %f, y %f", ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
+	
 }
 
 //スケールを縮尺する場合、なぜか0.2とか0.3とかの少数第一位までしか指定できない
@@ -51,7 +56,8 @@ void im::drawFbo(
 	glDeleteTextures(1, &sourceID);
 	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), fbo.getWidth(), fbo.getHeight());
 
-	ImGui::Begin(name.c_str(), 0, ImVec2(fbo.getWidth() * 1.1, fbo.getHeight()* 1.1f), .5f, flag);
+	ImGui::Begin(name.c_str(), 0, flag);
+	//ImGui::Begin(name.c_str(), 0, ImVec2(fbo.getWidth() * 1.1, fbo.getHeight()* 1.1f), .5f, flag);
 	{
 		ImGui::Image((ImTextureID)(uintptr_t)sourceID, ImVec2(fbo.getWidth(), fbo.getHeight()));
 	}
@@ -75,7 +81,8 @@ void im::drawImg(
 	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
 	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
 
-	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() * scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
+	ImGui::Begin(name.c_str(), 0, flag);
+	//ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() * scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
 	{
 		ImGui::Image((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale));
 	}
@@ -97,7 +104,8 @@ void im::drawImgAsButton(
 	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
 	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
 
-	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() *scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
+	ImGui::Begin(name.c_str(), 0, flag);
+	//ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() *scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
 	{
 		if (ImGui::ImageButton((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale))) {
 			fn();
@@ -122,7 +130,8 @@ void im::drawImgAsButton(
 	pix.setImageType(OF_IMAGE_COLOR_ALPHA);
 	sourceID = ofxMyUtil::GL::loadTextureImage2D(pix.getData(), img.getWidth(), img.getHeight());
 
-	ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() *scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
+	ImGui::Begin(name.c_str(), 0, flag);
+	//ImGui::Begin(name.c_str(), 0, ImVec2(img.getWidth() *scale * 1.1f, img.getHeight() * scale * 1.3f), .0f, flag);
 	{
 		if (ImGui::ImageButton((ImTextureID)(uintptr_t)sourceID, ImVec2(img.getWidth()* scale, img.getHeight()* scale))) {
 			fn();
@@ -136,7 +145,12 @@ void im::drawImgAsButton(
 // ImGuiWindowSetCondSettings
 //--------------------------------------------------------------
 void im::ImGuiLogWindow::addText(std::string str) {
+	
 	_log.push_back(str);
+
+	if (maxSize < _log.size()) {
+		_log.erase(_log.begin());
+	}
 }
 
 //--------------------------------------------------------------
@@ -146,12 +160,14 @@ void im::ImGuiLogWindow::setMaxLogSize(unsigned long size) {
 
 //--------------------------------------------------------------
 void im::ImGuiLogWindow::ImGui(const std::string &name) {
-	if (maxSize < _log.size()) _log.erase(_log.begin());
-	ImGui::Begin(name.c_str()); 
-	ImGui::BeginChild("log");
-	vector<string> _l = _log;
-	for each (string l in	_l) ImGui::TextWrapped("%s", l.c_str());
+
+	if (!ImGui::Begin(name.c_str())) { ImGui::End(); return; }
+
+	ImGui::BeginChild("Logs");
+	auto logs = _log;
+	for each (string l in	logs) ImGui::TextWrapped("%s", l.c_str());
 	ImGui::EndChild();
+
 	ImGui::End();
 }
 
@@ -170,7 +186,7 @@ ImGuiWindowFlags im::ImGuiWindowFlagsSettings::getImGuiWindowFlags() {
 }
 
 //--------------------------------------------------------------
-void im::ImGuiWindowFlagsSettings::ImGui(const string &name) {
+void im::ImGuiWindowFlagsSettings::ImGui(const string &name, bool showSettings) {
 	
 	ImGuiWindowFlags window_flags = 0;
 	if (no_titlebar)  window_flags |= ImGuiWindowFlags_NoTitleBar;
@@ -182,16 +198,18 @@ void im::ImGuiWindowFlagsSettings::ImGui(const string &name) {
 	flags = window_flags;
 
 	ImGui::Begin(name.c_str(), 0, window_flags);
-	ImGui::PushID(name.c_str());
-	if (ImGui::CollapsingHeader("_ImGui window style settings", 0)) {
-		ImGui::Checkbox("No titlebar", &no_titlebar);;
-		ImGui::Checkbox("No resize", &no_resize);
-		ImGui::Checkbox("No move", &no_move);;
-		ImGui::Checkbox("No scrollbar", &no_scrollbar);;
-		ImGui::Checkbox("No collapse", &no_collapse);
-		ImGui::Checkbox("No menu", &no_menu);
+	if (showSettings) {
+		ImGui::PushID(name.c_str());
+		if (ImGui::CollapsingHeader("_ImGui window style settings", 0)) {
+			ImGui::Checkbox("No titlebar", &no_titlebar);;
+			ImGui::Checkbox("No resize", &no_resize);
+			ImGui::Checkbox("No move", &no_move);;
+			ImGui::Checkbox("No scrollbar", &no_scrollbar);;
+			ImGui::Checkbox("No collapse", &no_collapse);
+			ImGui::Checkbox("No menu", &no_menu);
+		}
+		ImGui::PopID();
 	}
-	ImGui::PopID();
 	ImGui::End();
 
 }
@@ -254,10 +272,10 @@ void im::ImGuiWindowSetCondSettings::ImGui(const string &name) {
 	{
 		if (ImGui::CollapsingHeader("_ImGui window setCond settings")) {
 
-			ImGui::RadioButton("Always", &value, ImGuiSetCond_Always);
-			ImGui::RadioButton("Appearing", &value, ImGuiSetCond_Appearing);
-			ImGui::RadioButton("FirstUseEver", &value, ImGuiSetCond_FirstUseEver);
-			ImGui::RadioButton("Once", &value, ImGuiSetCond_Once);
+			ImGui::RadioButton("Always", &value, ImGuiCond_Always);
+			ImGui::RadioButton("Appearing", &value, ImGuiCond_Appearing);
+			ImGui::RadioButton("FirstUseEver", &value, ImGuiCond_FirstUseEver);
+			ImGui::RadioButton("Once", &value, ImGuiCond_Once);
 			
 		}
 	}

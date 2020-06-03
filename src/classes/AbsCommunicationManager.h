@@ -11,10 +11,20 @@ namespace ofxMyUtil {
 		//--------------------------------------------------------------
 		void ImGui(std::string name) {
 
-			ImGui::Begin(name.c_str());
+			if (!ImGui::Begin(name.c_str())) {
+				ImGui::End();
+				return;
+			}
+			ImGui::PushID(name.c_str());
 			addPropertyImGui();
+			ImGui::PopID();
+			ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+
 			ImGui::End();
-			_log.ImGui(name);
+			mLogGui.ImGui(name);
 		}
 
 		//--------------------------------------------------------------
@@ -25,16 +35,17 @@ namespace ofxMyUtil {
 		virtual void addPropertyImGui() = 0;
 		virtual void addProcessInThreadedFunction() = 0;
 
-		ofxMyUtil::im::ImGuiLogWindow _log;
+		ofxMyUtil::im::ImGuiLogWindow mLogGui;
 
 	private:
 
 		//--------------------------------------------------------------
-		void threadedFunction() override {
-			while (isThreadRunning()) {
-
-				if (lock()) {
-
+		void threadedFunction() override 
+		{
+			while (isThreadRunning()) 
+			{
+				if (lock()) 
+				{
 					addProcessInThreadedFunction();
 
 					sleep(10);

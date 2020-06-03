@@ -1,6 +1,7 @@
 #pragma once
 #include "ofGraphics.h"
 #include "ofAppRunner.h"
+#include "ofMath.h"
 #include "ofCircleInfo.h"
 
 namespace ofxMyUtil {
@@ -38,10 +39,10 @@ namespace ofxMyUtil {
 		}
 
 		ofVec2f scaleMouse(ofVec2f mousePosition) {
-
+			
 			float _w = ofMap(mousePosition.x, 0.0, w, 0.0, ofGetWidth());
 			float _h = ofMap(mousePosition.y, 0.0, h, 0.0, ofGetHeight());
-
+			
 			return ofVec2f(_w, _h);
 
 		}

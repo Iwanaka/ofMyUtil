@@ -20,7 +20,8 @@
 namespace ofxMyUtil {
 
 	//配列のサイズを確認する
-	//#define IWAX_ARRAY_SIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
+	//#define IWAX_GET_ARRAY_SIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
+	//#define GET_ARRAY_SIZE(a)   (sizeof(a)/sizeof(a[0]))
 	//これを使いましょう 機能は一緒
 	//_ARRAYSIZE
 
