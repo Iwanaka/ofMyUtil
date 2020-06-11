@@ -24,7 +24,7 @@ namespace ofxMyUtil
 
 			if (isThreadRunning()) 
 			{
-				mLogGui.addText("[Warning] : You tried to start thread but thread has already running.");
+				mLogGui.AddText("[Warning] : You tried to start thread but thread has already running.");
 				return;
 			}
 
@@ -54,7 +54,7 @@ namespace ofxMyUtil
 			
 			if (mSerial->isInitialized()) 
 			{
-				mLogGui.addText("[Send] : " + msg);
+				mLogGui.AddText("[Send] : " + msg);
 				//serial->writeBytes(msg.c_str(), msg.length());
 
 				unsigned char* writeBytes = (unsigned char*)msg.c_str();
@@ -73,7 +73,7 @@ namespace ofxMyUtil
 			}
 			else 
 			{
-				mLogGui.addText("[Warning] : You tried to send messages but now is not connecting to COM port.");
+				mLogGui.AddText("[Warning] : You tried to send messages but now is not connecting to COM port.");
 			}
 		}
 

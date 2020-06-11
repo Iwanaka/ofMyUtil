@@ -1,20 +1,19 @@
 #pragma once
 #include <string>
 #include "ofThread.h"
-#include "ofImGuiUtil.h"
+#include "ofxMyUtilImGui.h"
 
-namespace ofxMyUtil {
-	class AbsCommunicationManager : public ofThread {
-
+namespace ofxMyUtil 
+{
+	class AbsCommunicationManager : public ofThread 
+	{
 	public:
 
 		//--------------------------------------------------------------
-		void ImGui(std::string name) {
+		void ImGui(std::string name) 
+		{
+			if (!ImGui::Begin(name.c_str())) { ImGui::End(); return; }
 
-			if (!ImGui::Begin(name.c_str())) {
-				ImGui::End();
-				return;
-			}
 			ImGui::PushID(name.c_str());
 			addPropertyImGui();
 			ImGui::PopID();
@@ -22,8 +21,9 @@ namespace ofxMyUtil {
 			ImGui::Separator();
 			ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
-
 			ImGui::End();
+
+			// Log
 			mLogGui.ImGui(name);
 		}
 
@@ -35,17 +35,18 @@ namespace ofxMyUtil {
 		virtual void addPropertyImGui() = 0;
 		virtual void addProcessInThreadedFunction() = 0;
 
-		ofxMyUtil::im::ImGuiLogWindow mLogGui;
+		ofxMyUtil::Im::ImGuiLogWindow mLogGui;
 
 	private:
 
-		//--------------------------------------------------------------
+		// openframeworks function
 		void threadedFunction() override 
 		{
 			while (isThreadRunning()) 
 			{
 				if (lock()) 
 				{
+
 					addProcessInThreadedFunction();
 
 					sleep(10);
@@ -53,6 +54,5 @@ namespace ofxMyUtil {
 				}
 			}
 		}
-
 	};
 }

@@ -8,67 +8,54 @@
 
 namespace ofxMyUtil {
 
-	namespace im {
+	namespace Im {
 
-		//ImGui内に基本情報表示
+		// ImGui内に基本情報表示
 		void BasicInfos();
 		void BasicInfos(const std::string &name, ImGuiWindowFlags flags = 0);
 		void BasicInfosWindow();
+		void BasicInfosWindow(const std::string &name, ImGuiWindowFlags flags = 0);
 
-		//ImGui内にFboを表示
-		void drawFbo(
-			const ofFbo &fbo,
-			GLuint &sourceID,
-			std::string name = "fbo",
-			ImGuiWindowFlags flag = 0);
+		// ImGui内にFboを表示
+		void DrawFbo(const ofFbo &fbo, GLuint &sourceID, 
+			std::string name = "fbo", ImGuiWindowFlags flag = 0);
 
-		//ImGui内に画像を表示
-		void drawImg(
-			const ofImage &img,
-			GLuint &sourceID,
-			float scale = 1.0f,
-			std::string name = "image",
-			ImGuiWindowFlags flag = 0);
+		// ImGui内に画像を表示
+		void DrawImage(const ofImage &img, GLuint &sourceID, float scale = 1.0f, 
+			std::string name = "image", ImGuiWindowFlags flag = 0);
 
-		//ImGui内にボタンとして画像を表示、関数ポインタでコールバック
-		void drawImgAsButton(
-			const ofImage &img,
-			GLuint &sourceID,
-			void(*fn)(),
-			float scale = 1.0f,
-			std::string name = "image button",
-			ImGuiWindowFlags flag = 0);
 
-		//ImGui内にボタンとして画像を表示、functionでコールバック
-		void drawImgAsButton(
-			const ofImage &img,
-			GLuint &sourceID,
-			std::function<void()> fn,
-			float scale = 1.0f,
+		// ImGui内にボタンとして画像を表示、関数ポインタでコールバック
+		void DrawImageButton(const ofImage &img, GLuint &sourceID, void(*fn)(), float scale = 1.0f,
+			std::string name = "image button", ImGuiWindowFlags flag = 0);
+
+		// ImGui内にボタンとして画像を表示、functionでコールバック
+		void DrawImageButton(const ofImage &img, GLuint &sourceID, std::function<void()> fn, float scale = 1.0f,
 			std::string name = "image button",
 			ImGuiWindowFlags flag = 0);
 
 
 		//--------------------------------------------------------------
-		//ログ表示
-		class ImGuiLogWindow {
+		// classes
+		//--------------------------------------------------------------
+		class ImGuiLogWindow 
+		{
 		public:
-			ImGuiLogWindow() :
-				maxSize(50),
-				_log(std::vector<std::string>()) {}
+			ImGuiLogWindow() : mLogSize(50), mLog(std::deque<std::string>()) {}
 			~ImGuiLogWindow() {}
-			void addText(std::string str);
-			void setMaxLogSize(unsigned long size);
+			void AddText(std::string str);
+			void AddTextToFile(std::string str, std::string path, bool append = false, bool withTimeStamp = false);
+			void SetLogSize(unsigned long size) { mLogSize = size; }
 			void ImGui(const std::string &name);
-			void clear();
+			void Clear() { mLog.clear(); }
 		private:
-			unsigned long maxSize;
-			std::vector<std::string> _log;
+			unsigned long mLogSize;
+			std::deque<std::string> mLog;
 		};
 
 		//--------------------------------------------------------------
-		//Windowの詳細設定クラス
-		class ImGuiWindowFlagsSettings {
+		class ImGuiWindowFlagsSettings 
+		{
 		public:
 			ImGuiWindowFlagsSettings() :
 				no_titlebar(false),
@@ -77,35 +64,35 @@ namespace ofxMyUtil {
 				no_scrollbar(false),
 				no_collapse(false),
 				no_menu(false),
-				flags(0) {}
+				mFlags(0) {}
 			~ImGuiWindowFlagsSettings() {}
-			void loadSettings(const std::string &path);
-			void saveSettings(const std::string &path);
-			ImGuiWindowFlags getImGuiWindowFlags();
+			void LoadSettings(const std::string &path);
+			void SaveSettings(const std::string &path);
+			ImGuiWindowFlags GetImGuiWindowFlags() { return mFlags; }
 			void ImGui(const std::string &name, bool showSettings);
 
 		private:
-			ImGuiWindowFlags flags;
+			ImGuiWindowFlags mFlags;
 			bool no_titlebar, no_resize, no_move, no_scrollbar, no_collapse, no_menu;
 		};
 
 
 		//--------------------------------------------------------------
-		//Windowの位置の振る舞い設定クラス
-		class ImGuiWindowSetCondSettings {
+		class ImGuiWindowSetCondSettings 
+		{
 		public:
 			ImGuiWindowSetCondSettings() :
 				value((int)ImGuiCond_Appearing) {};
 			~ImGuiWindowSetCondSettings() {};
-			void changeState(const int &state);
-			int getSetCondState();
+			void changeState(const int &state) { value = state; }
+			int getSetCondState() { return value; }
 			void ImGui(const std::string &name);
 		private:
 			int value;
 		};
 
 
-		//日本語UTF-8
+		// 日本語UTF-8
 		static const ImWchar glyphRangesJapanese[] = {
 	0x0020, 0x007E, 0x00A2, 0x00A3, 0x00A7, 0x00A8, 0x00AC, 0x00AC, 0x00B0, 0x00B1, 0x00B4, 0x00B4, 0x00B6, 0x00B6, 0x00D7, 0x00D7,
 	0x00F7, 0x00F7, 0x0391, 0x03A1, 0x03A3, 0x03A9, 0x03B1, 0x03C1, 0x03C3, 0x03C9, 0x0401, 0x0401, 0x0410, 0x044F, 0x0451, 0x0451,

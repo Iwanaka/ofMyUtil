@@ -7,25 +7,24 @@
 
 namespace ofxMyUtil {
 
-	typedef struct {
+	using ofSaveImageQueue = struct 
+	{
 		std::string savePath = "/";
 		ofPixels pix = ofPixels();
 		ofImageQualityType qType = ofImageQualityType::OF_IMAGE_QUALITY_BEST;
-	}ofSaveImageQueue;
+	};
+
 
 	class ofThreadSaveImage : public ofThread
 	{
 	private:
-
 		std::queue< ofSaveImageQueue> q;
-
 	public:
-		
 		ofThreadSaveImage() {}
-		~ofThreadSaveImage() { stop(); }
+		~ofThreadSaveImage() { Stop(); }
 
-		void run() { startThread(); }
-		void stop() { waitForThread(); }
+		void Run() { startThread(); }
+		void Stop() { waitForThread(); }
 
 		void threadedFunction() {
 			while (isThreadRunning()) {
@@ -37,17 +36,15 @@ namespace ofxMyUtil {
 			}
 		}
 
-		void addQueue(const ofSaveImageQueue &queue) { q.push(queue); }
-		void addQueue(const ofPixels &pix, const std::string &savePath, const ofImageQualityType type) {
-
+		void AddQueue(const ofSaveImageQueue &queue) { q.push(queue); }
+		void AddQueue(const ofPixels &pix, const std::string &savePath, const ofImageQualityType type) 
+		{
 			ofSaveImageQueue _q;
 			_q.pix = pix;
 			_q.savePath = savePath;
 			_q.qType = type;
-			addQueue(_q);
-
+			AddQueue(_q);
 		}
-
 	};
 }
 

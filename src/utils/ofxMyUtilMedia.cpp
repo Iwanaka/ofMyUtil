@@ -18,12 +18,10 @@ using namespace ofxMyUtil;
 	#include <semaphore.h>
 #endif
 
-
 //--------------------------------------------------------------
-std::string Media::getIpAddress() {
-
+std::string Media::GetIpAddress() 
+{
 #ifdef WIN32
-
 	int i;
 	HOSTENT *lpHost;
 	IN_ADDR inaddr;
@@ -43,19 +41,15 @@ std::string Media::getIpAddress() {
 	}
 
 	return std::string(szIP);
-
 #else
-
 	//mac or linux
 	return std::string();
-
 #endif
-
 }
 
 //--------------------------------------------------------------
-void Media::showIpHost() {
-
+void Media::ShowIpHost() 
+{
 #ifdef WIN32
 
 	int i;

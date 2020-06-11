@@ -2,7 +2,7 @@
 //--------------------------
 // classes
 #include "ofCircleInfo.h"
-#include "ofImGuiUtil.h"
+#include "ofxMyUtilImGui.h"
 #include "ofScaleable.h"
 #include "ofThreadSaveImage.h"
 
@@ -20,10 +20,7 @@
 namespace ofxMyUtil {
 
 	//配列のサイズを確認する
-	//#define IWAX_GET_ARRAY_SIZE(_ARR)  ((int)(sizeof(_ARR)/sizeof(*_ARR)))
-	//#define GET_ARRAY_SIZE(a)   (sizeof(a)/sizeof(a[0]))
-	//これを使いましょう 機能は一緒
-	//_ARRAYSIZE
+	#define IWAX_GET_ARRAY_SIZE(a)   (sizeof(a)/sizeof(a[0]))
 
 	//not a number check
 	/*template<typename T>

@@ -6,7 +6,7 @@
 
 namespace ofxMyUtil {
 	namespace Console {
-		void chengeConsollColor(unsigned short colorID);
-		void hideConsole();
+		void ChengeConsollColor(unsigned short colorID);
+		void HideConsole();
 	}
 }

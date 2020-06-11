@@ -8,20 +8,21 @@
 namespace ofxMyUtil {
 	namespace String {
 
-		const char charset[] =
+		const char Charset[] =
 			"0123456789"
 			"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 			"abcdefghijklmnopqrstuvwxyz";
 
-		std::string wstring_to_string(std::wstring wstr);
-		std::wstring string_to_wstring(std::string str);
+		std::string WString_to_String(std::wstring wstr);
+		std::wstring String_to_WString(std::string str);
 
-		std::string toSha256(std::string str);
-		std::string adjustFileNo(const unsigned int& currentNo, const unsigned int& digit);
-		std::string generateRandomText(const unsigned int &length);
-		std::string generateUUID();
+		std::string ToSha256(std::string str);
+		// 0詰め
+		std::string AdjustNo(const unsigned int& currentNo, const unsigned int& digit);
+		std::string GenerateRandomText(const unsigned int &length);
+		std::string GenerateUUID();
 
-		//ImGui用などにJsonなどからデータを読み込む際に使う
-		bool loadString2FloatArray(const std::string &str, std::string delimiter, float *pArray);
+		// ImGui用などにJsonなどからデータを読み込む際に使う
+		bool LoadString2FloatArray(const std::string &str, std::string delimiter, float *pArray);
 	}
 }

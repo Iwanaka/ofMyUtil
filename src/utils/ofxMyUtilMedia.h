@@ -5,11 +5,11 @@
 // ofxMyUtil Media
 //--------------------------------------------------------------
 
-namespace ofxMyUtil {
-	namespace Media {
-
-		std::string getIpAddress();	
-		void showIpHost();
-
+namespace ofxMyUtil 
+{
+	namespace Media 
+	{
+		std::string GetIpAddress();	
+		void ShowIpHost();
 	}
 }

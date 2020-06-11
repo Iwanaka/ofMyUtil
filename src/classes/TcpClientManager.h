@@ -3,109 +3,101 @@
 #include "ofxNetwork.h"
 #include "ofUtils.h"
 
-//égÇ§Ç»äÎåØ Ç»ÇÒÇ©è„éËÇ≠ìÆÇ©Ç»Ç¢éûÇ™ëΩÇ¢
-namespace ofxMyUtil {
-
+namespace ofxMyUtil 
+{
 	class TcpClientManager : public AbsCommunicationManager
 	{
 	public:
 
-		TcpClientManager() {}
-		~TcpClientManager() { stop(); }
+		TcpClientManager(std::shared_ptr<ofxTCPClient> tcp) { this->mTcp = tcp; }
+		~TcpClientManager() { Stop(); }
 
 		//--------------------------------------------------------------
-		void setup(std::shared_ptr<ofxTCPClient> tcp) {
-			this->tcp = tcp;
-		}
-
-		//--------------------------------------------------------------
-		void start(std::string ip, int port, std::string delimiter = "\n", bool autoRedirect = false) {
-			
-			if (!nullCheck()) return;
-
-			if (isThreadRunning()) {
-				mLogGui.addText("[Warning] : You tryed start thread but thread has already running.");
+		void Start(std::string ip, int port, std::string delimiter = "\n", bool autoRedirect = false) 
+		{	
+			if (isThreadRunning()) 
+			{
+				mLogGui.AddText("[Warning] : You tried start thread but thread has already running.");
 				return;
 			}
 
-			this->ip = ip;
-			this->port = port;
-			this->autoRedirect = autoRedirect;
-			this->delimiter = delimiter;
+			mIpAddress = ip;
+			mPort = port;
+			mAutoRedirect = autoRedirect;
+			mDelimiter = delimiter;
 
 			startThread();
 		}
 
 		//--------------------------------------------------------------
-		void stop() {
-			if (isThreadRunning()) {
+		void Stop() 
+		{
+			if (isThreadRunning()) 
+			{
 				stopThread();
 				waitForThread();
 			}
-
-			if (!nullCheck()) return;
-			if (tcp->isConnected()) tcp->close();
+			if (mTcp->isConnected()) mTcp->close();
 		}
 
 		//--------------------------------------------------------------
 		void sendMsg(std::string msg) {
 			
-			if (!nullCheck()) return;
-			if (tcp->isConnected()) {
-				mLogGui.addText("[Send] : " + msg);
-				tcp->send(msg);
+			if (mTcp->isConnected()) 
+			{
+				mLogGui.AddText("[Send] : " + msg);
+				mTcp->send(msg);
 			}
-			else {
-				mLogGui.addText("[Warning] : You tryed to send messages but now is not connecting to server.");
+			else 
+			{
+				mLogGui.AddText("[Warning] : You tryed to send messages but now is not connecting to server.");
 			}
 		}
 
 		//--------------------------------------------------------------
-		void addProcessInThreadedFunction() override {
-
+		void addProcessInThreadedFunction() override 
+		{
 			try
 			{
-				if (tcp->isConnected()) {
-
-					//string str = tcp.receive();
-					//string str = tcp.receiveRaw();
-					//char rBuf[4];
-					//int res = tcp.receiveRawBytes(rBuf, 4);
-					//int res = tcp.peekReceiveRawBytes(rBuf, 4);
-
-					std::string str = tcp->receive();
-					if (0 < str.length()) {
-						mLogGui.addText("[Recieve] " + str);
+				if (mTcp->isConnected()) 
+				{
+					std::string str = mTcp->receive();
+					if (0 < str.length()) 
+					{
+						mLogGui.AddText("[Recieve] " + str);
 						ofNotifyEvent(onReceiveNewMsg, str, this);
 					}
 				}
-				else {
+				else 
+				{
+					mDeltaTime = ofGetElapsedTimeMillis() - mConnectTime;
 
-					deltaTime = ofGetElapsedTimeMillis() - connectTime;
-					if (deltaTime > retryTime && autoRedirect) {
+					// Redirect
+					if (mDeltaTime > mRetryTime && mAutoRedirect) 
+					{
+						mLogGui.AddText("[Notice] : try connect to server...");
 
-						mLogGui.addText("[Notice] : try connect to server...");
+						ofxTCPSettings settings(mIpAddress, mPort);
+						settings.messageDelimiter = mDelimiter;
+						mTcp->setup(settings);
 
-						ofxTCPSettings settings(ip, port);
-						settings.messageDelimiter = delimiter;
-						tcp->setup(settings);
-
-						if (tcp->isConnected()) {
-							mLogGui.addText("[Notice] : Success connect to server.");
+						if (mTcp->isConnected()) 
+						{
+							mLogGui.AddText("[Notice] : Success connect to server.");
 							ofNotifyEvent(onConnectResult, true, this);
 						}
-						else {
-							mLogGui.addText("[ERROR] : Failed connect to server.");
+						else 
+						{
+							mLogGui.AddText("[ERROR] : Failed connect to server.");
 							ofNotifyEvent(onConnectResult, false, this);
 						}
-
-						connectTime = ofGetElapsedTimeMillis();
+						mConnectTime = ofGetElapsedTimeMillis();
 					}
 				}
 			}
 			catch (const std::exception&)
 			{
-				mLogGui.addText("[ERROR] : Happend unknown error");
+				mLogGui.AddText("[ERROR] : Unknown error");
 			}
 		}
 
@@ -114,39 +106,24 @@ namespace ofxMyUtil {
 		ofEvent<const bool> onConnectResult;
 
 	private:
-
-		//--------------------------------------------------------------
-		bool nullCheck() {
-
-			if (tcp == nullptr) {
-				mLogGui.addText("[Warning] : You tryed start thread but tcp class is null");
-				return 0;
+		void addPropertyImGui() override 
+		{
+			if (ImGui::CollapsingHeader("Settings Data")) 
+			{
+				ImGui::Text("Tcp server ip : %s, port : %i", mIpAddress.c_str(), mPort);
+				ImGui::Text("Tcp server isConnect : %s", std::string(mTcp->isConnected() ? "connected" : "not connected").c_str());
+				ImGui::Checkbox("Tcp connect auto redirect", &mAutoRedirect);
+				ImGui::InputInt("Retry time", &mRetryTime, 100, 100000);
 			}
-			else {
-				return 1;
-			}
-
 		}
 
-		//--------------------------------------------------------------
-		void addPropertyImGui() override {
-
-			if (ImGui::CollapsingHeader("Settings Data")) {
-				ImGui::Text("Tcp server ip : %s, port : %i", ip.c_str(), port);
-				if (nullCheck()) ImGui::Text("Tcp server isConnect : %s", std::string(tcp->isConnected() ? "connected" : "not connected").c_str());
-				ImGui::Checkbox("Tcp connect auto redirect", &autoRedirect);
-				ImGui::InputInt("retry Time", &retryTime, 100, 100000);
-			}
-
-		}
-
-		std::shared_ptr<ofxTCPClient> tcp;
-		std::string ip = "127.0.0.1";
-		int port = 8080;
-		std::string delimiter = "\n";
-		bool autoRedirect = false;
-		uint64_t deltaTime = 0, connectTime = 0;
-		int retryTime = 5000;
+		std::shared_ptr<ofxTCPClient> mTcp;
+		std::string mIpAddress = "127.0.0.1";
+		int mPort = 8080;
+		std::string mDelimiter = "\n";
+		bool mAutoRedirect = false;
+		uint64_t mDeltaTime = 0, mConnectTime = 0;
+		int mRetryTime = 5000;
 
 	};
 }
