@@ -4,7 +4,6 @@
 #include "ofFbo.h"
 #include "ofTexture.h"
 #include "ofImage.h"
-#include "ofJson.h"
 
 //--------------------------------------------------------------
 // ofxMyUtil IO
@@ -13,23 +12,23 @@
 namespace ofxMyUtil {
 	namespace IO {
 
-		bool JsonToFile(const std::string &buf, std::string savePath, bool pretty = true);
-		bool JsonToFile(const ofBuffer &buf, std::string savePath, bool pretty = true);
+		bool JsonToFile(const std::string &Buf, std::string Path, bool Pretty = true);
+		bool JsonToFile(const ofBuffer &Buf, std::string Path, bool Pretty = true);
 
-		bool FboToFile(const ofFbo &fbo,  std::string savePath, 
-			ofImageType type = ofImageType::OF_IMAGE_COLOR,
-			ofImageQualityType quality = ofImageQualityType::OF_IMAGE_QUALITY_BEST);
+		bool FboToFile(const class ofFbo &Fbo,  std::string Path, 
+			ofImageType Type = ofImageType::OF_IMAGE_COLOR,
+			ofImageQualityType Quality = ofImageQualityType::OF_IMAGE_QUALITY_BEST);
 
-		bool TextureToFile(const ofTexture &tex, std::string savePath, 
-			ofImageType type = ofImageType::OF_IMAGE_COLOR,
-			ofImageQualityType quallity = ofImageQualityType::OF_IMAGE_QUALITY_BEST);
+		bool TextureToFile(const ofTexture &Tex, std::string Path, 
+			ofImageType Type = ofImageType::OF_IMAGE_COLOR,
+			ofImageQualityType Quallity = ofImageQualityType::OF_IMAGE_QUALITY_BEST);
 
-		bool CheckExitsFile(const std::string& path, const float& retryTime);
-		bool CreateDir(const std::string& path);
+		bool CheckExitsFile(const std::string& Path, const float& RetryTime);
+		bool CreateDir(const std::string& Path);
 
-		bool TextToFile(const std::string& path, const std::stringstream& Args, bool append = false);
-		bool TextToFile(const std::string& path, const char *Args, bool append = false);
-		bool TextToFile(const std::string& path, std::string Args, bool append = false);
+		bool TextToFile(const std::string& Path, const std::stringstream& Args, bool Append = false);
+		bool TextToFile(const std::string& Path, const char *Args, bool Append = false);
+		bool TextToFile(const std::string& Path, std::string Args, bool Append = false);
 
 		//template <typename T>
 		//bool loadJsonAsKey(const nlohmann::json::value_type &j, T& val, T initVal) {

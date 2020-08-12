@@ -13,15 +13,15 @@ using namespace std;
 // ofBuffer buf(ss.str().c_str(), ss.str().size());
 // ofxMyUtil::IO::jsonToFile(buf);
 //--------------------------------------------------------------
-bool IO::JsonToFile(const string &str, string savePath, bool pretty) 
+bool IO::JsonToFile(const string &Buf, string Path, bool Pretty) 
 {
 	try
 	{
-		auto json = ofJson::parse(str);
-		if (pretty) return ofSavePrettyJson(savePath, json);
-		else return ofSaveJson(savePath, json);
+		auto json = ofJson::parse(Buf);
+		if (Pretty) return ofSavePrettyJson(Path, json);
+		else return ofSaveJson(Path, json);
 	}
-	catch (const std::exception&)
+	catch (const exception&)
 	{
 		return 0;
 	}
@@ -29,37 +29,37 @@ bool IO::JsonToFile(const string &str, string savePath, bool pretty)
 }
 
 //--------------------------------------------------------------
-bool IO::JsonToFile(const ofBuffer &buf, std::string savePath, bool pretty) {
-	return JsonToFile(buf.getText(), savePath, pretty);
+bool IO::JsonToFile(const ofBuffer &Buf, std::string Path, bool Pretty) 
+{
+	return JsonToFile(Buf.getText(), Path, Pretty);
 }
 
 //--------------------------------------------------------------
-bool IO::FboToFile(const ofFbo &fbo, string savePath, ofImageType type, ofImageQualityType quality) 
+bool IO::FboToFile(const ofFbo &Fbo, string Path, ofImageType Type, ofImageQualityType Quality) 
 {
 	ofPixels pix;
-	pix.allocate(fbo.getWidth(), fbo.getHeight(), type);
-	fbo.readToPixels(pix);
+	pix.allocate(Fbo.getWidth(), Fbo.getHeight(), Type);
+	Fbo.readToPixels(pix);
 
-	return ofSaveImage(pix, savePath, quality);
+	return ofSaveImage(pix, Path, Quality);
 }
 
 //--------------------------------------------------------------
-bool IO::TextureToFile(const ofTexture &tex, std::string savePath, ofImageType type, ofImageQualityType quality) 
+bool IO::TextureToFile(const ofTexture &Tex, std::string Path, ofImageType Type, ofImageQualityType Quality) 
 {
 	ofPixels pix;
-	pix.allocate(tex.getWidth(), tex.getHeight(), type);
-	tex.readToPixels(pix);
+	pix.allocate(Tex.getWidth(), Tex.getHeight(), Type);
+	Tex.readToPixels(pix);
 
-	return ofSaveImage(pix, savePath, quality);
+	return ofSaveImage(pix, Path, Quality);
 }
 
 //--------------------------------------------------------------
-bool IO::CheckExitsFile(const string& path, const float& _retryTime) 
+bool IO::CheckExitsFile(const string& Path, const float& RetryTime) 
 {
-	ofFile file(path);
-
+	ofFile file(Path);
 	float currentTime = ofGetElapsedTimef();
-	float retryTime = _retryTime;
+	float retryTime = RetryTime;
 	float meusureTime = 0.0;
 
 	while (file.exists() || meusureTime <= retryTime) 
@@ -74,42 +74,41 @@ bool IO::CheckExitsFile(const string& path, const float& _retryTime)
 }
 
 //--------------------------------------------------------------
-bool IO::CreateDir(const string& path) 
+bool IO::CreateDir(const string& Path) 
 {
 	//ofDirectory dir(path);
 	//return ofDirectory::createDirectory(path);
-
-	filesystem::path p(path);
+	filesystem::path p(Path);
 	boost::system::error_code e;
 	bool check = filesystem::exists(p, e);
 
 	if (!check || !e) 
 	{
-		bool create = filesystem::create_directory(path, e);
+		bool create = filesystem::create_directory(Path, e);
 		if (create) return 1;
 	}
 	return 0;
 }
 
 //--------------------------------------------------------------
-bool IO::TextToFile(const string& path, const stringstream& Args, bool append)
+bool IO::TextToFile(const string& Path, const stringstream& Args, bool Append)
 {
 	//ofFile f(path, ofFile::ReadWrite);
 	//if (!f.exists()) f.create();
 
 	filebuf fb;
-	if (append) fb.open(path, ios::app);
-	else fb.open(path, std::ios::out);
+	if (Append) fb.open(Path, ios::app);
+	else fb.open(Path, ios::out);
 
 	if (!fb.is_open()) return false;
 
-	std::ostream os(&fb);
+	ostream os(&fb);
 	stringstream ss(Args.str());
 
 	if (ss.fail()) return false;
 
 	string temp;
-	while (std::getline(ss, temp)) 
+	while (getline(ss, temp)) 
 	{
 		if (temp != "") 
 		{
@@ -122,16 +121,15 @@ bool IO::TextToFile(const string& path, const stringstream& Args, bool append)
 }
 
 //--------------------------------------------------------------
-bool IO::TextToFile(const std::string& path, const char *Args, bool append) 
+bool IO::TextToFile(const string& Path, const char *Args, bool Append) 
 {
-	std::stringstream ss;
-	ss << Args;
-	return TextToFile(path, ss, append);
+	stringstream ss; ss << Args;
+	return TextToFile(Path, ss, Append);
 }
 
-bool IO::TextToFile(const std::string& path, std::string Args, bool append) 
+//--------------------------------------------------------------
+bool IO::TextToFile(const std::string& Path, std::string Args, bool Append) 
 {
-	std::stringstream ss;
-	ss << Args;
-	return TextToFile(path, ss, append);
+	stringstream ss; ss << Args;
+	return TextToFile(Path, ss, Append);
 }

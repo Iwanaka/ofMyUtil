@@ -22,9 +22,37 @@ std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> strconverter;
 string String::WString_to_String(std::wstring wstr) {
 	return strconverter.to_bytes(wstr);
 }
+
 //--------------------------------------------------------------
 wstring String::String_to_WString(std::string str) {
 	return strconverter.from_bytes(str);
+}
+
+//--------------------------------------------------------------
+std::string String::StringToUtf8(string msg)
+{
+	wstring_convert<codecvt_utf8<wchar_t>, wchar_t> cv;
+	wstring wmsg = cv.from_bytes(msg);
+
+	// バッファサイズ
+	int iBufferSize = ::WideCharToMultiByte(CP_UTF8, 0, wmsg.c_str()
+		, -1, (char *)NULL, 0, NULL, NULL);
+
+	// バッファの取得
+	CHAR* cpBufUTF8 = new CHAR[iBufferSize];
+
+	// wstring → UTF8
+	::WideCharToMultiByte(CP_UTF8, 0, wmsg.c_str(), -1, cpBufUTF8
+		, iBufferSize, NULL, NULL);
+
+	// stringの生成
+	std::string oRet(cpBufUTF8, cpBufUTF8 + iBufferSize - 1);
+
+	// バッファの破棄
+	delete[] cpBufUTF8;
+
+	// 変換結果を返す
+	return(oRet);
 }
 
 //--------------------------------------------------------------
@@ -91,6 +119,15 @@ string String::GenerateUUID()
 		}
 	}
 	return uuid;
+}
+
+//--------------------------------------------------------------
+std::string String::GetTodayStamp()
+{
+	string year = ofToString(ofGetYear());
+	string month = AdjustNo(ofGetMonth(), 2);
+	string day = AdjustNo(ofGetDay(), 2);
+	return year + month + day;
 }
 
 //--------------------------------------------------------------
